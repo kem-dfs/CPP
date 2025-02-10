@@ -1,0 +1,80 @@
+C++ constructor:
+- default
+  - typically have no parameters, but they can have parameters with default values.
+  - if no constructors are declared, the compiler provides an implicit inline default constructor
+  - if any non-default constructor defined, the compiler does not provide a default constructor
+  - can prevent the compiler from generating an implicit default constructor by defining as deleted
+- parameterized
+- copy constructor
+- move constructor
+
+there are 2 types of initializes value with constructor: inside code block or struct style
+
+order of construction:
+1. calls base class and member construcors in the order of declaration
+2. if the class is derived from base classes, it initializes the object's virtual base pointer
+3. if the class has or inherits virtual functions, it initializes the object's virtual function pointers. virtual function pointers point to the class's virtual function table to enable correct binding of virtual calls to code.
+4. executes any code in its function body
+
+a derived class contructor always calls a base class constructor, so it can rely on completely constructed base classes before any extra work is done.
+if a base class doesn't have a default constructor, must supply the base class constructor parameters in the derived class contructor.
+
+if a constructor throws an exception, the order of destruction is the reverse of the order of construction:
+- the code in the body of the constructor function is unwound
+- base class and member objects are destroyed, in the reverse order of declaration
+- if the constructor is non-delegating, all fully constructed base class objects and members are destroyed. if the object itself is not fully constructed, the destructor is not run.
+
+if the constructor of a base class is non-public, but accessible to a derived class, then can not use empty braces to init a object of the derived type under std::c++17 and later
+
+if a class is derived from multiple base classes, the base class constructor are invoked in the order in which they're listed in the declaration of the derived class.
+
+delegating constructor:
+a delegating constructor calls a different constructor in the same class to do some of the work of initialization. usefull when multiple constructors that all have to perform similar work.
+ex:
+Box(int i) : Box(i ,i , i);
+Box(int a, int b, int c);
+
+inheriting constructor:
+a derived class can inherit the constructor from a direct base class by using a "using" declaration as:
+
+using Base::Base
+
+a derived class can't inherit from multiple base classes if those base classes have constructors that have an identical signature.
+
+composite classes:
+classes that contain class-type members are known as composite classes.
+in this case, class-type member constructor is called before class's own constructor.
+when a contained class lacks a default construcotr, must use an initialization list in the constructor of the composite class.
+
+
+move constructor:
+- moves the ownership of an existing object's data to a new variable without copying the original data.
+- it takes an rvalue reference as its first parameter, and any later parameters must have default values.
+- compiler chosses a move constructor when the object is initialized by another object of the same type, if the other object is about to be destroyed and no longer needs its resources.
+
+the compiler generates an implicit a move constructor if there is no user-declared copy constructor, copy assignment operator, move assignment operator, or destructor.
+
+if no implicit or explicit move constructor is defined, operations that would otherwise use a move constructor use the copy constructor instead.
+
+if a class declares a move constructor or move assigment operator, the implicitly declared copy constructor is defined as deleted.
+
+an implicit declared move constructor is defined as deleted if any members that are class types lack a destructor or if the compiler can't determine which constructor to use for the move operation.
+
+constexpr construtor:
+a constructor may be declared as constexpr if:
+- it's either declared as defaulted or else it satisfied all the conditions for constexpr functions in general.
+- the class has no virtual base classes.
+- each of the parameters is a literal type.
+- the body isn't a function try-block
+- all non-statuc data members and base class subobjects are initialized.
+- if the class is a union having variant members, or has anonymous union, only one of the union member is initialized.
+- every non-static data member of class types, and all base class subobjects have a constexpr constructor.
+
+Initializer list constructors:
+if a constructor take a std::initializer_list<T> as its parameter, and any other parameters have default arguments, that constructor is selected in overload resolution when the class is instantiated through direct initialization.
+
+explicit constructor:
+if a class has a constructor with a single parameter, or if all parameters except one have a default value, the parameter type can be implicitly converted to the class type.
+use "explicit" on a constructor to prevent such conversions as below.(in some cases may lead to subtle but serious error)
+ex:
+Box b = 24;
